@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' 'unsafe-inline';"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./renderer.js" defer></script>
+    <title>Snappy</title>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step 1 -->
+      <div id="step-1" class="card" style="display: none">
+        <h2 class="step-title">
+          <div class="dot"></div>
+          <div>Step 1: Connect Your Phone</div>
+        </h2>
+
+        <div class="step-desc">
+          Enable USB debugging and connect your Android phone
+        </div>
+
+        <div class="instructions">
+          <h4>USB Debugging Instructions</h4>
+          <ol class="steps">
+            <li>
+              <div class="step-number">1</div>
+              <div class="step-text">
+                <strong>Enable Developer Options</strong><br />
+                Go to Settings → About Phone → Tap 'Build Number' 7 times
+              </div>
+            </li>
+            <li>
+              <div class="step-number">2</div>
+              <div class="step-text">
+                <strong>Enable USB Debugging</strong><br />
+                Go to Settings → Developer Options → Enable 'USB Debugging'
+              </div>
+            </li>
+            <li>
+              <div class="step-number">3</div>
+              <div class="step-text">
+                <strong>Connect Your Phone</strong><br />
+                Use a USB cable to connect your phone to this computer
+              </div>
+            </li>
+            <li>
+              <div class="step-number">4</div>
+              <div class="step-text">
+                <strong>Allow USB Debugging</strong><br />
+                On your phone, tap 'Allow' when prompted about USB debugging
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="status-row">
+          <div class="flex-center" id="device-status">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect>
+              <path d="M12 18h.01"></path>
+            </svg>
+            <div>No phone detected</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="step-2" class="card" style="display: none">
+        <h2 class="step-title">
+          <div class="dot"></div>
+          <div>Step 2: Open Snapchat</div>
+        </h2>
+
+        <div class="step-desc">Snappy will detect when Snapchat is running</div>
+
+        <div class="instructions-container">
+          <div class="instructions">
+            <h4>Launch the Snapchat app on your phone</h4>
+
+            <ol class="steps align-center">
+              <li>
+                <div class="step-number">1</div>
+                <div class="step-text">Unlock your phone</div>
+              </li>
+              <li>
+                <div class="step-number">2</div>
+                <div class="step-text">Open Snapchat</div>
+              </li>
+              <li>
+                <div class="step-number">3</div>
+                <div class="step-text">Keep the app open</div>
+              </li>
+            </ol>
+          </div>
+
+          <div class="instruction-image">
+            <img src="./images/open-snapchat.png" alt="Open Snapchat" />
+          </div>
+        </div>
+
+        <div class="status-row">
+          <div class="flex-center" id="snapchat-status">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 10h.01"></path>
+              <path d="M15 10h.01"></path>
+              <path
+                d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"
+              ></path>
+            </svg>
+            <div>Waiting for Snapchat</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div id="step-3" class="card" style="display: none">
+        <h2 class="step-title">
+          <div class="dot"></div>
+          <div>Step 3: Automation Controls</div>
+        </h2>
+
+        <div class="step-desc">
+          Snappy will detect when ad is getting displayed
+        </div>
+
+        <div class="controls">
+          <button onclick="startTapper()">Start Auto Tap</button>
+          <button onclick="startLeftScroll()">Start Left Auto Scroll</button>
+          <button onclick="startRightScroll()">Start Right Auto Scroll</button>
+          <button onclick="startTapScroll()">Start Tap & Scroll</button>
+          <button onclick="captureScreen()">📸 Take Screenshot</button>
+        </div>
+
+        <div class="status-row">
+          <div class="flex-center" id="ad-status">
+            <!-- <div>Ad not detected</div> -->
+          </div>
+
+          <div class="flex-center">
+            <button class="stop-btn" onclick="stop()">Stop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

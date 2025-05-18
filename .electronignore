@@ -1,0 +1,40 @@
+# Development files
+node_modules/.cache
+.git
+.github
+.vscode
+.idea
+*.log
+.DS_Store
+
+# Source control
+.gitignore
+.gitattributes
+
+# Build and config files
+.travis.yml
+.eslintrc
+.prettierrc
+.babelrc
+webpack.config.js
+rollup.config.js
+tsconfig.json
+jest.config.js
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+
+# Test files
+__tests__/
+test/
+tests/
+*.spec.js
+*.test.js
+
+# Debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 

@@ -1,0 +1,176 @@
+button {
+  background-color: #6e4cff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #593be5;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+body {
+  font-family: sans-serif;
+  background: #f9fafb;
+  padding: 1rem;
+}
+
+.container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  min-width: 486px;
+  max-width: 486px;
+  max-height: 450px;
+  min-height: 450px;
+}
+
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  background: #4f46e5;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #374151;
+  display: inline-block;
+}
+
+.step-desc {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.instructions-container {
+  position: relative;
+  height: 250px;
+}
+
+.instruction-image {
+  position: absolute;
+  top: 30px;
+  right: 10px;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 280px;
+}
+
+.instruction-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.instructions h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.steps li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  background: #e0e7ff;
+  color: #4338ca;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-right: 1rem;
+}
+
+.step-text {
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4rem;
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+.align-center li {
+  align-items: center;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.controls button {
+  width: 250px;
+}
+
+.stop-btn {
+  margin: 0;
+  width: 100px;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.stop-btn:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.toastify {
+  position: absolute;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  z-index: 1000 !important;
+}
