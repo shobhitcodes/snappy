@@ -80,7 +80,7 @@ async function takeScreenshot() {
 
     const timestamp = Date.now();
     const remotePath = `/sdcard/screen-${timestamp}.png`;
-    const localDir = path.join(__dirname, '../snapshots1');
+    const localDir = path.join(__dirname, '../snapshots');
     const localPath = path.join(localDir, `screenshot-${timestamp}.png`);
 
     if (!fs.existsSync(localDir)) {

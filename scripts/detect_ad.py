@@ -1,30 +1,38 @@
 import cv2
-import pytesseract
 import sys
+import os
 
-TEMPLATE_PATH = "assets/ad_template.png"
-TEMPLATE_MATCH_THRESHOLD = 0.60
+TEMPLATE_PATHS = [
+    "assets/ad_template1.png",
+    "assets/ad_template2.png",
+    "assets/ad_template3.png",
+]
+TEMPLATE_MATCH_THRESHOLD = 0.70
 IMAGE_TOP_CROP_PERCENTAGE = 0.08
-IMAGE_OCR_REGION_PATH = "assets/ocr_region_top.png"
 
 def detect_ad(screen_path):
     img = cv2.imread(screen_path)
-    template = cv2.imread(TEMPLATE_PATH)
+    if img is None:
+        raise ValueError(f"Could not read screenshot: {screen_path}")
+    
+    h, w, _ = img.shape
+    # top = img[:int(h * IMAGE_TOP_CROP_PERCENTAGE), :]
 
-    match_result = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
-    _, max_val, _, _ = cv2.minMaxLoc(match_result)
-    print('max_val: ', max_val)
+    for template_path in TEMPLATE_PATHS:
+        template = cv2.imread(template_path)
+        if template is None:
+            print(f"⚠️ Could not read template: {template_path}")
+            continue
 
-    if max_val > TEMPLATE_MATCH_THRESHOLD:
-        return True
+        match_result = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(match_result)
+        print(f"[{os.path.basename(template_path)}] max_val: {max_val}")
 
-    # fallback to OCR
-    # h, w, _ = img.shape
-    # top = img[:int(h * IMAGE_TOP_CROP_PERCENTAGE), :]  # rows from 0 to 10% height
-    # text = pytesseract.image_to_string(top)
-    # cv2.imwrite(IMAGE_OCR_REGION_PATH, top)
-    # print('OCR text (top): ', text)
-    # return "Ad" in text
+        if max_val > TEMPLATE_MATCH_THRESHOLD:
+            print(f"✅ Matched with template: {template_path}")
+            return True
+
+    return False
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -37,5 +45,5 @@ if __name__ == '__main__':
         is_ad = detect_ad(screenshot_path)
         print("Detected as Ad" if is_ad else "No Ad Detected")
     except Exception as e:
-        print("Error running detection:", str(e))
+        print("⚠️ Error running detection:", str(e))
         sys.exit(1)

@@ -1,6 +1,7 @@
 const { screen } = require('electron');
 const { execFile } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 const { sendShellCommand, takeScreenshot } = require('./adb');
 
 let tapInterval;
@@ -96,8 +97,10 @@ function stopAutomation() {
 }
 
 async function checkAd() {
+  let screenshotPath;
+
   try {
-    const screenshotPath = await takeScreenshot();
+    screenshotPath = await takeScreenshot();
 
     if (!screenshotPath) {
       return false;
@@ -108,6 +111,12 @@ async function checkAd() {
     
     return new Promise((resolve, reject) => {
       execFile(pythonPath, [scriptPath, screenshotPath], (error, stdout, stderr) => {
+        try {
+          fs.unlinkSync(screenshotPath);
+        } catch (unlinkErr) {
+          console.warn(`⚠️ Failed to delete screenshot: ${unlinkErr.message}`);
+        }
+
         if (error) {
           console.error('Python script error:', stderr || error.message);
           return resolve(false);
@@ -126,6 +135,15 @@ async function checkAd() {
     });
   } catch (err) {
     console.error('Error on checkAd:', err);
+
+    if (screenshotPath) {
+      try {
+        fs.unlinkSync(screenshotPath);
+      } catch (e) {
+        console.warn(`⚠️ Failed to delete screenshot in error block: ${e.message}`);
+      }
+    }
+    
     return false;
   }
 }
