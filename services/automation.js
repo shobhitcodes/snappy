@@ -1,28 +1,15 @@
-const adb = require('adbkit');
 const { screen } = require('electron');
-const client = adb.createClient({ host: '127.0.0.1', port: 5037 });
+const { execFile } = require('child_process');
+const path = require('path');
+const { sendShellCommand, takeScreenshot } = require('./adb');
 
-let tapInterval = null;
-let scrollInterval = null;
+let tapInterval;
+let scrollInterval;
 
-async function getDeviceId() {
-  const devices = await client.listDevices();
-  if (!devices.length) throw new Error('No connected devices');
-  return devices[0].id;
-}
-
-async function sendShellCommand(cmd) {
-  const deviceId = await getDeviceId();
-  await client.shell(deviceId, cmd);
-}
-
-function runTapper({ x, y, delay = 1000 }) {
-  if (!x || !y) {
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const { width, height } = primaryDisplay.workAreaSize;
-    x = width / 2;
-    y = height / 2;
-  }
+function runTapper({ x, y, delay = 4000 }) {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  x = x ?? width / 2 + Math.floor(Math.random() * 400);
+  y = y ?? (height + 100) / 2 + Math.floor(Math.random() * 400);
 
   tapInterval = setInterval(() => {
     sendShellCommand(`input tap ${x} ${y}`);
@@ -36,35 +23,29 @@ function runScroller({ direction = 'down', delay = 1500 }) {
   }, delay);
 }
 
-function runLeftScroll({ delay = 2500 }) {
+function runLeftScroll({ delay = 4000 }) {
   scrollInterval = setInterval(() => {
-    console.log('running left scroll');
     const startX = 1000 + Math.floor(Math.random() * 20); // right side
     const endX = 200 + Math.floor(Math.random() * 20);    // left side
     const y = 1000 + Math.floor(Math.random() * 20);
-    const duration = 200 + Math.floor(Math.random() * 100); // 300–400ms
+    const duration = 100 + Math.floor(Math.random() * 100);
     sendShellCommand(`input swipe ${startX} ${y} ${endX} ${y} ${duration}`);
   }, delay);
 }
 
-function runRightScroll({ delay = 2500 }) {
+function runRightScroll({ delay = 4000 }) {
   scrollInterval = setInterval(() => {
-    console.log('running right scroll');
     const startX = 200 + Math.floor(Math.random() * 20); // left side
     const endX = 1000 + Math.floor(Math.random() * 20); // right side
     const y = 1000 + Math.floor(Math.random() * 20);
-    const duration = 200 + Math.floor(Math.random() * 100); // 300–400ms
+    const duration = 100 + Math.floor(Math.random() * 100);
     sendShellCommand(`input swipe ${startX} ${y} ${endX} ${y} ${duration}`);
   }, delay);
 }
 
-function runTapAndScroll(config) {
-  runTapper(config);
-  runScroller(config);
-}
 let tapScrollActive = false;
 
-function runTapAndScroll({ minDelay = 1200, maxDelay = 2500 }) {
+function runTapAndScroll({ minDelay = 2500, maxDelay = 4000 }) {
   tapScrollActive = true;
 
   const loop = async () => {
@@ -75,26 +56,27 @@ function runTapAndScroll({ minDelay = 1200, maxDelay = 2500 }) {
 
     if (action < 0.4) {
       // 40% chance - tap
-      const x = 500 + Math.floor(Math.random() * 400); // Random X within screen
-      const y = 800 + Math.floor(Math.random() * 400); // Random Y
+      const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+      const x = width / 2 + Math.floor(Math.random() * 400);
+      const y = (height + 100) / 2 + Math.floor(Math.random() * 400);
       sendShellCommand(`input tap ${x} ${y}`);
-      console.log(`Tapped at ${x}, ${y}`);
+      // console.log(`Tapped at ${x}, ${y}`);
     } else if (action < 0.7) {
       // 30% chance - scroll left
-      const startX = 1000 + Math.floor(Math.random() * 30);
-      const endX = 200 + Math.floor(Math.random() * 30);
+      const startX = 1000 + Math.floor(Math.random() * 20);
+      const endX = 200 + Math.floor(Math.random() * 20);
       const y = 1000 + Math.floor(Math.random() * 20);
-      const duration = 300 + Math.floor(Math.random() * 150);
+      const duration = 100 + Math.floor(Math.random() * 100);
       sendShellCommand(`input swipe ${startX} ${y} ${endX} ${y} ${duration}`);
-      console.log('Scrolled left');
+      // console.log('Scrolled left');
     } else {
       // 30% chance - scroll right
-      const startX = 200 + Math.floor(Math.random() * 30);
-      const endX = 1000 + Math.floor(Math.random() * 30);
+      const startX = 200 + Math.floor(Math.random() * 20);
+      const endX = 1000 + Math.floor(Math.random() * 20);
       const y = 1000 + Math.floor(Math.random() * 20);
-      const duration = 300 + Math.floor(Math.random() * 150);
+      const duration = 100 + Math.floor(Math.random() * 100);
       sendShellCommand(`input swipe ${startX} ${y} ${endX} ${y} ${duration}`);
-      console.log('Scrolled right');
+      // console.log('Scrolled right');  
     }
 
     // Wait random delay before next action
@@ -102,14 +84,50 @@ function runTapAndScroll({ minDelay = 1200, maxDelay = 2500 }) {
     setTimeout(loop, delay);
   };
 
-  loop();
+  if (tapScrollActive) {
+    loop();
+  }
 }
 
 function stopAutomation() {
   tapScrollActive = false;
-  console.log('stopping automation');
   clearInterval(tapInterval);
   clearInterval(scrollInterval);
 }
 
-module.exports = { runTapper, runScroller, runLeftScroll, runRightScroll, runTapAndScroll, stopAutomation };
+async function checkAd() {
+  try {
+    const screenshotPath = await takeScreenshot();
+
+    if (!screenshotPath) {
+      return false;
+    };
+
+    const pythonPath = path.join(__dirname, '..', 'snappy-venv', 'bin', 'python');
+    const scriptPath = path.join(__dirname, '..', 'scripts', 'detect_ad.py');
+    
+    return new Promise((resolve, reject) => {
+      execFile(pythonPath, [scriptPath, screenshotPath], (error, stdout, stderr) => {
+        if (error) {
+          console.error('Python script error:', stderr || error.message);
+          return resolve(false);
+        }
+
+        // console.log('📄 Python output:', stdout);
+
+        if (stdout.includes("Detected as Ad")) {
+          resolve(true);
+        } else if (stdout.includes("No Ad Detected")) {
+          resolve(false);
+        } else {
+          reject('Unexpected output from Python');
+        }
+      });
+    });
+  } catch (err) {
+    console.error('Error on checkAd:', err);
+    return false;
+  }
+}
+
+module.exports = { runTapper, runScroller, runLeftScroll, runRightScroll, runTapAndScroll, stopAutomation, checkAd };

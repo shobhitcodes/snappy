@@ -1,12 +1,10 @@
 const { app, BrowserWindow, Menu, ipcMain, protocol } = require('electron');
 const path = require('path');
-const { checkDeviceConnected, getCurrentApp, isSnapchatOpen, takeScreenshot } = require('./services/adb');
-const { runTapper, runScroller, runLeftScroll, runRightScroll, runTapAndScroll, stopAutomation } = require('./services/automation');
+const { checkDeviceConnected, isSnapchatOpen, takeScreenshot } = require('./services/adb');
+const { runTapper, runScroller, runLeftScroll, runRightScroll, runTapAndScroll, stopAutomation, checkAd } = require('./services/automation');
 
 // process.env.NODE_ENV = 'production';
-
 const isDev = process.env.NODE_ENV !== 'production';
-// const isDev = true;
 const isMac = process.platform === 'darwin';
 
 let mainWindow;
@@ -16,7 +14,6 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     title: "Snappy",
     width: isDev ? 1200 : 600,
-    // width: 600,
     height: 628,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -29,7 +26,7 @@ function createMainWindow() {
     mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.loadFile(path.join(__dirname, './renderer/index.html'));
+  mainWindow.loadFile(path.join(__dirname, './renderer/splash.html'));
 }
 
 function createAboutWindow() {
@@ -52,12 +49,6 @@ function createAboutWindow() {
 
 // app ready
 app.whenReady().then(() => {
-  protocol.registerFileProtocol('app', (request, callback) => {
-    const url = request.url.replace('app://', '');
-    const filePath = path.join(app.getAppPath(), 'resources', 'images', url); // Assuming your images are in 'resources/images'
-    callback(filePath);
-  });
-
   createMainWindow();
 
   // implement menu
@@ -110,6 +101,7 @@ ipcMain.handle('start-right-scroll', (_, config) => runRightScroll(config));
 ipcMain.handle('start-tapscroll', (_, config) => runTapAndScroll(config));
 ipcMain.handle('stop-automation', () => stopAutomation());
 ipcMain.handle('take-screenshot', async () => await takeScreenshot());
+ipcMain.handle('check-ad', (_, config) => checkAd(config));
 
 app.on('window-all-closed', () => {
   if (!isMac) {

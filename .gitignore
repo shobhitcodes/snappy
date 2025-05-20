@@ -4,3 +4,6 @@ dumps/
 snapshots/
 release/
 .env
+snapshots
+.DS_Store
+

@@ -16,31 +16,24 @@
     "files": [
       "main.js",
       "preload.js",
-      "renderer/",
-      "assets/",
+      "renderer/**",
+      "assets/**",
+      "scripts/**",
+      "snappy-venv/**",
       "package.json",
-      "!release",
       "!**/*.md",
       "!package-lock.json",
+      "!release",
       "!.electronignore"
     ],
     "directories": {
       "output": "release"
     },
     "asar": true,
-    "asarUnpack": [],
     "mac": {
       "target": "dmg",
       "category": "public.app-category.productivity",
-         "icon": "build/icons/mac/icon.icns"
-    },
-    "win": {
-      "target": "portable",
-      "icon": "build/icons/win/icon.ico"
-    },
-    "linux": {
-      "target": "AppImage",
-         "icon": "build/icons/png/512x512.png"
+      "icon": "build/icons/mac/icon.icns"
     }
   },
   "author": "Shobhit Agarwal",

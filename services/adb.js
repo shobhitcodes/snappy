@@ -1,12 +1,15 @@
 const path = require('path');
 const fs = require('fs');
 const adb = require('adbkit');
+const { delay } = require('../utils/helper');
 
 const client = adb.createClient({ host: '127.0.0.1', port: 5037 });
 
 async function getDeviceId() {
   const devices = await client.listDevices();
-  if (!devices.length) throw new Error('No device connected');
+
+  if (!devices.length) return null;
+
   return devices[0].id;
 }
 
@@ -22,16 +25,33 @@ async function checkDeviceConnected() {
 
 async function getCurrentApp() {
   try {
-    const devices = await client.listDevices();
+    const deviceId = await getDeviceId();
 
-    if (!devices.length) return null;
+    if (!deviceId) return null;
 
-    const deviceId = devices[0].id;
-    const output = await client.shell(deviceId, 'dumpsys window windows');
-    const result = await adb.util.readAll(output);
-    const text = result.toString();
-    const match = text.match(/mCurrentFocus.+\/(.+?)}/);
-    return match ? match[1] : 'unknown';
+     // Try the newer method first: dumpsys window displays
+     let outputDisplays = await client.shell(deviceId, 'dumpsys window displays');
+     let resultDisplays = await adb.util.readAll(outputDisplays);
+     let textDisplays = resultDisplays.toString();
+     let matchDisplays = textDisplays.match(/mCurrentFocus=Window{.+? (.+?)\/.*?}/);
+     if (!matchDisplays) {
+       matchDisplays = textDisplays.match(/mFocusedApp=AppWindowToken{.+? (.+?) /);
+     }
+     if (matchDisplays && matchDisplays[1]) {
+       return matchDisplays[1].trim();
+     }
+ 
+     // Fallback to the older method: dumpsys window windows
+     const outputWindows = await client.shell(deviceId, 'dumpsys window windows');
+     const resultWindows = await adb.util.readAll(outputWindows);
+     const textWindows = resultWindows.toString();
+     const matchWindows = textWindows.match(/mCurrentFocus.+\/(.+?)}/);
+     if (matchWindows && matchWindows[1]) {
+       return matchWindows[1];
+     }
+ 
+     return 'unknown'; // If neither method yields a result
+ 
   } catch (err) {
     console.error('error on getCurrentApp: ', err);
     return null;
@@ -40,9 +60,8 @@ async function getCurrentApp() {
 
 async function isSnapchatOpen() {
   try {
-    console.log(new Date().toISOString(), 'isSnapchatOpen');
     const currentApp = await getCurrentApp();
-    console.log('currentApp: ', currentApp);
+    // console.log('currentApp: ', currentApp);
     return currentApp && currentApp.includes('com.snapchat.android');
   } catch (err) {
     console.error('error on isSnapchatOpen: ', err);
@@ -50,22 +69,19 @@ async function isSnapchatOpen() {
   }
 }
 
-function streamToBuffer(stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    stream.on('data', (chunk) => chunks.push(chunk));
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-    stream.on('error', reject);
-  });
-}
-
 async function takeScreenshot() {
   try {
     const deviceId = await getDeviceId();
+
+    if (!deviceId) {
+      console.error('No device connected');
+      return;
+    }
+
     const timestamp = Date.now();
-    const remotePath = `/sdcard/screen-top-${timestamp}.png`;
-    const localDir = path.join(__dirname, '../snapshots');
-    const localPath = path.join(localDir, `screenshot-top-${timestamp}.png`);
+    const remotePath = `/sdcard/screen-${timestamp}.png`;
+    const localDir = path.join(__dirname, '../snapshots1');
+    const localPath = path.join(localDir, `screenshot-${timestamp}.png`);
 
     if (!fs.existsSync(localDir)) {
       fs.mkdirSync(localDir);
@@ -86,12 +102,12 @@ async function takeScreenshot() {
     const transfer = await client.pull(deviceId, remotePath);
     const buffer = await streamToBuffer(transfer);
     fs.writeFileSync(localPath, buffer);
+    // await waitForFile(localPath);
 
-    // Optionally delete remote screenshot
     try {
       await client.shell(deviceId, `rm ${remotePath}`);
     } catch (err) {
-      console.warn('⚠️ Failed to delete remote screenshot:', err.message);
+      console.warn('error on delete remote screenshot:', err.message);
     }
 
     return localPath;
@@ -100,6 +116,21 @@ async function takeScreenshot() {
     return null;
   }
 }
+
+// function waitForFile(path, timeout = 1000) {
+//   return new Promise((resolve, reject) => {
+//     const start = Date.now();
+//     const interval = setInterval(() => {
+//       if (fs.existsSync(path) && fs.statSync(path).size > 0) {
+//         clearInterval(interval);
+//         resolve(true);
+//       } else if (Date.now() - start > timeout) {
+//         clearInterval(interval);
+//         reject(new Error("File not ready or empty"));
+//       }
+//     }, 100);
+//   });
+// }
 
 function streamToBuffer(stream) {
   return new Promise((resolve, reject) => {
@@ -110,13 +141,14 @@ function streamToBuffer(stream) {
   });
 }
 
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+async function sendShellCommand(cmd) {
+  const deviceId = await getDeviceId();
+  await client.shell(deviceId, cmd);
 }
 
 module.exports = {
   checkDeviceConnected,
-  getCurrentApp,
   isSnapchatOpen,
   takeScreenshot,
+  sendShellCommand,
 };

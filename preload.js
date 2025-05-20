@@ -1,18 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const os = require('os');
 const path = require('path');
 const toastify = require('toastify-js');
-
-contextBridge.exposeInMainWorld('versions', {
-  node: () => process.versions.node,
-  chrome: () => process.versions.chrome,
-  electron: () => process.versions.electron,
-});
-
-contextBridge.exposeInMainWorld('os', {
-  homedir: () => os.homedir(),
-  platform: () => process.platform,
-});
 
 contextBridge.exposeInMainWorld('path', {
   join: (...args) => path.join(...args),
@@ -39,4 +27,5 @@ contextBridge.exposeInMainWorld('snappyAPI', {
   startTapScroll: (config) => ipcRenderer.invoke('start-tapscroll', config),
   stopAutomation: () => ipcRenderer.invoke('stop-automation'),
   takeScreenshot: () => ipcRenderer.invoke('take-screenshot'),
+  checkAd: () => ipcRenderer.invoke('check-ad'),
 });

@@ -11,14 +11,19 @@ const adStatus = document.getElementById('ad-status');
 
 const initialDeviceStatus = deviceStatus.innerHTML;
 const initialSnapchatStatus = snapchatStatus.innerHTML;
+const initialAdStatus = adStatus.innerHTML;
 
 // polling
 let pollDeviceConnectionInterval;
 let pollSnapchatInterval;
+let pollAdInterval;
 
 function showStep() {
+  stopAutomation();
+  // console.log('showStep: currentStep: ', currentStep);
   switch (currentStep) {
     case 1:
+      stopPollingAll();
       deviceStatus.innerHTML = initialDeviceStatus;
       step1.style.display = 'block';
       step2.style.display = 'none';
@@ -26,17 +31,21 @@ function showStep() {
       startPollingConnection(1);
       break;
     case 2:
-      console.log('step 2');
+      if (pollAdInterval) {
+        clearInterval(pollAdInterval);
+      }
       snapchatStatus.innerHTML = initialSnapchatStatus;
       step1.style.display = 'none';
       step2.style.display = 'block';
       step3.style.display = 'none';
-      startPollingSnapchat();
+      startPollingConnection(2);
       break;
     case 3:
+      adStatus.innerHTML = initialAdStatus;
       step1.style.display = 'none';
       step2.style.display = 'none';
       step3.style.display = 'block';
+      startPollingConnection(3);
       break;
     default:
       break;
@@ -56,6 +65,10 @@ async function progressUI(step) {
       showStep();
       break;
     case 2:
+      snapchatStatus.innerText = '✅ Snapchat detected';
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      currentStep = 3;
+      showStep();
       break;
     case 3:
       break;
@@ -70,112 +83,81 @@ function startPollingConnection(step) {
       if (pollDeviceConnectionInterval) {
         clearInterval(pollDeviceConnectionInterval);
       }
-      pollDeviceConnectionInterval = setInterval(checkDeviceConnection, 2000);
+
+      pollDeviceConnectionInterval = setInterval(checkDeviceConnection, 1000);
       break;
     case 2:
+      if (pollSnapchatInterval) {
+        clearInterval(pollSnapchatInterval);
+      }
+
+      pollSnapchatInterval = setInterval(checkSnapchat, 1000);
+      break;
+    case 3:
+      if (pollAdInterval) {
+        clearInterval(pollAdInterval);
+      }
+
+      pollAdInterval = setInterval(checkAd, 1500);
       break;
   }
 }
 
-function stopPollingConnection(pollInterval) {
-  if (pollInterval) clearInterval(pollInterval);
-}
-
-// async function updateUI(isConnected) {
-//   if (!isConnected) {
-//     return;
-//   }
-
-//   deviceStatus.innerText = '✅ Phone connected';
-//   await new Promise((resolve) => setTimeout(resolve, 2000));
-//   step1.style.display = 'none';
-//   step2.style.display = 'block';
-//   startPollingSnapchat();
+// function stopPollingConnection(pollInterval) {
+//   if (pollInterval) clearInterval(pollInterval);
 // }
 
-function startPollingSnapchat() {
-  pollSnapchatInterval = setInterval(async () => {
-    const isSnapchatOpen = await window.snappyAPI.checkSnapchat();
-    updateSnapchatStatus(isSnapchatOpen);
-  }, 4000);
-}
-
-function updateSnapchatStatus(isSnapchatOpen) {
-  if (!isSnapchatOpen) {
-    return;
+function stopPollingAll() {
+  if (pollDeviceConnectionInterval) {
+    clearInterval(pollDeviceConnectionInterval);
   }
 
-  snapchatStatus.innerText = '✅ Snapchat detected';
-  stopPollingConnection(pollSnapchatInterval);
-  currentStep = 3;
-  showStep();
+  if (pollSnapchatInterval) {
+    clearInterval(pollSnapchatInterval);
+  }
+
+  if (pollAdInterval) {
+    clearInterval(pollAdInterval);
+  }
 }
 
-async function connect() {
-  const result = await window.snappyAPI.checkConnection();
-  document.getElementById('connectionStatus').innerText = result
-    ? '✅ Phone Connected'
-    : '❌ Phone Not Detected';
-}
-
-async function checkSnap() {
-  const result = await window.snappyAPI.checkSnapchat();
-  document.getElementById('snapStatus').innerText = result
-    ? '📸 Snapchat is open'
-    : '⛔ Snapchat not detected';
-}
-
+// operations
 function startTapper() {
   window.snappyAPI.stopAutomation();
-
   window.snappyAPI.startTapper({});
-  document.getElementById('automationStatus').innerText =
-    '🚀 Tapping Started...';
+  alertSuccess('🚀 Tapping');
 }
 
 function startLeftScroll() {
   window.snappyAPI.stopAutomation();
-
   window.snappyAPI.startLeftScroll({});
-  document.getElementById('automationStatus').innerText =
-    '🚀 Left Scrolling Started...';
+  alertSuccess('🚀 Left Scrolling');
 }
 
 function startRightScroll() {
   window.snappyAPI.stopAutomation();
-
   window.snappyAPI.startRightScroll({});
-  document.getElementById('automationStatus').innerText =
-    '🚀 Right Scrolling Started...';
-}
-
-
-function startScroller() {
-  const direction = document.getElementById('scrollDirection').value;
-  const delay = Number(document.getElementById('tapDelay').value || 1000);
-  window.snappyAPI.startScroller({ direction, delay });
-  document.getElementById('automationStatus').innerText =
-    '📜 Scrolling Started...';
+  alertSuccess('🚀 Right Scrolling');
 }
 
 function startTapScroll() {
-  const x = Number(document.getElementById('tapX').value || 500);
-  const y = Number(document.getElementById('tapY').value || 1000);
-  const delay = Number(document.getElementById('tapDelay').value || 1000);
-  const direction = document.getElementById('scrollDirection').value;
-  window.snappyAPI.startTapScroll({ x, y, delay, direction });
-  document.getElementById('automationStatus').innerText =
-    '🔁 Tap & Scroll Started...';
-}
-
-function stop() {
   window.snappyAPI.stopAutomation();
-  // document.getElementById('automationStatus').innerText =
-  //   '🛑 Automation Stopped.';
+  window.snappyAPI.startTapScroll({});
+  alertSuccess('🚀 Auto Tap & Scroll');
 }
 
 async function captureScreen() {
   await window.snappyAPI.takeScreenshot();
+}
+
+function stopAutomation() {
+  window.snappyAPI.stopAutomation();
+}
+
+function stopAdChecker() {
+  if (pollAdInterval) {
+    clearInterval(pollAdInterval);
+  }
 }
 
 // check methods
@@ -187,7 +169,7 @@ async function checkDeviceConnection() {
       document.body.style.pointerEvents = 'none';
       alertError('Phone disconnected');
       currentStep = 1;
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       showStep();
     }
     return;
@@ -195,6 +177,39 @@ async function checkDeviceConnection() {
 
   if (currentStep == 1) {
     progressUI(1);
+  }
+}
+
+async function checkSnapchat() {
+  const isSnapchatOpen = await window.snappyAPI.checkSnapchat();
+
+  if (!isSnapchatOpen) {
+    if (currentStep != 2) {
+      document.body.style.pointerEvents = 'none';
+      alertError('Snapchat not detected');
+      currentStep = 2;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      showStep();
+    }
+    return;
+  }
+
+  if (currentStep == 2) {
+    progressUI(2);
+  }
+}
+
+async function checkAd() {
+  try {
+    const isAdDisplayed = await window.snappyAPI.checkAd();
+  
+    if (isAdDisplayed) {
+      adStatus.innerText = '✅ Ad detected';
+    } else {
+      adStatus.innerText = '❌ Ad not detected';
+    }
+  } catch (error) {
+    console.error('checkAd error: ', error);
   }
 }
 
@@ -218,7 +233,7 @@ function alertSuccess(message) {
     duration: 2000,
     close: false,
     style: {
-      background: 'green',
+      background: '#64ccc9',
       color: 'white',
       textAlign: 'center',
     },
