@@ -2,21 +2,18 @@ import cv2
 import sys
 import os
 
-TEMPLATE_PATHS = [
-    "assets/ad_template1.png",
-    "assets/ad_template2.png",
-    "assets/ad_template3.png",
-]
 TEMPLATE_MATCH_THRESHOLD = 0.71
-IMAGE_TOP_CROP_PERCENTAGE = 0.08
 
-def detect_ad(screen_path):
+def detect_ad(screen_path, assets_dir):
     img = cv2.imread(screen_path)
     if img is None:
         raise ValueError(f"Could not read screenshot: {screen_path}")
     
-    h, w, _ = img.shape
-    # top = img[:int(h * IMAGE_TOP_CROP_PERCENTAGE), :]
+    TEMPLATE_PATHS = [
+        os.path.join(assets_dir, "ad_template1.png"),
+        os.path.join(assets_dir, "ad_template2.png"),
+        os.path.join(assets_dir, "ad_template3.png"),
+    ]
 
     for template_path in TEMPLATE_PATHS:
         template = cv2.imread(template_path)
@@ -35,14 +32,15 @@ def detect_ad(screen_path):
     return False
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Usage: detect_ad.py <screenshot_path>")
+    if len(sys.argv) < 3:
+        print("Usage: detect_ad.py <screenshot_path> <assets_dir>")
         sys.exit(1)
 
     screenshot_path = sys.argv[1]
+    assets_dir = sys.argv[2]
 
     try:
-        is_ad = detect_ad(screenshot_path)
+        is_ad = detect_ad(screenshot_path, assets_dir)
         print("Detected as Ad" if is_ad else "No Ad Detected")
     except Exception as e:
         print("⚠️ Error running detection:", str(e))

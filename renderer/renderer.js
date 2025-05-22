@@ -119,13 +119,13 @@ async function progressUI(step) {
   switch (step) {
     case 1:
       deviceStatus.innerText = '✅ Phone connected';
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       currentStep = 2;
       showStep();
       break;
     case 2:
       snapchatStatus.innerText = '✅ Snapchat detected';
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       currentStep = 3;
       showStep();
       break;

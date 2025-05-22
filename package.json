@@ -21,7 +21,6 @@
       "services/",
       "scripts/",
       "utils/",
-      "snappy-venv/**",
       "package.json",
       "!package-lock.json",
       "!release",
@@ -32,6 +31,10 @@
       "output": "release"
     },
     "asar": true,
+    "asarUnpack": [
+      "scripts/**",
+      "assets/**"
+    ],
     "mac": {
       "target": "dmg",
       "category": "public.app-category.productivity",

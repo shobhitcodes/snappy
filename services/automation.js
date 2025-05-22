@@ -1,10 +1,18 @@
-const { screen } = require('electron');
+const { screen, app } = require('electron');
 const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const { sendShellCommand, takeScreenshot } = require('./adb');
 const os = require('os');
 const homeDir = os.homedir();
+
+const appPath = app.isPackaged
+  ? path.join(process.resourcesPath, 'app.asar.unpacked')
+  : path.join(__dirname, '..');
+
+const assetsPath = app.isPackaged
+  ? path.join(process.resourcesPath, 'app.asar.unpacked', 'assets')
+  : path.join(__dirname, '..', 'assets');
 
 let tapInterval;
 let scrollInterval;
@@ -26,7 +34,7 @@ function runScroller({ direction = 'down', delay = 1500 }) {
   }, delay);
 }
 
-function runLeftScroll({ delay = 4000 }) {
+function runLeftScroll({ delay = 5000 }) {
   scrollInterval = setInterval(() => {
     const startX = 1000 + Math.floor(Math.random() * 20); // right side
     const endX = 200 + Math.floor(Math.random() * 20);    // left side
@@ -36,7 +44,7 @@ function runLeftScroll({ delay = 4000 }) {
   }, delay);
 }
 
-function runRightScroll({ delay = 4000 }) {
+function runRightScroll({ delay = 5000 }) {
   scrollInterval = setInterval(() => {
     const startX = 200 + Math.floor(Math.random() * 20); // left side
     const endX = 1000 + Math.floor(Math.random() * 20); // right side
@@ -48,7 +56,7 @@ function runRightScroll({ delay = 4000 }) {
 
 let tapScrollActive = false;
 
-function runTapAndScroll({ minDelay = 2500, maxDelay = 4000 }) {
+function runTapAndScroll({ minDelay = 4000, maxDelay = 5000 }) {
   tapScrollActive = true;
 
   const loop = async () => {
@@ -109,10 +117,10 @@ async function checkAd() {
     };
 
     const pythonPath = path.join(homeDir, 'Downloads', 'Snappy', 'snappy-venv', 'bin', 'python');
-    const scriptPath = path.join(__dirname, '..', 'scripts', 'detect_ad.py');
+    const scriptPath = path.join(appPath, 'scripts', 'detect_ad.py');
     
     return new Promise((resolve, reject) => {
-      execFile(pythonPath, [scriptPath, screenshotPath], (error, stdout, stderr) => {
+      execFile(pythonPath, [scriptPath, screenshotPath, assetsPath], (error, stdout, stderr) => {
         try {
           fs.unlinkSync(screenshotPath);
         } catch (unlinkErr) {

@@ -1,9 +1,16 @@
+const { app } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const adb = require('adbkit');
 const { delay } = require('../utils/helper');
 
 const client = adb.createClient({ host: '127.0.0.1', port: 5037 });
+
+const localDir = path.join(app.getPath('userData'), 'snapshots');
+
+if (!fs.existsSync(localDir)) {
+  fs.mkdirSync(localDir, { recursive: true });
+}
 
 async function getDeviceId() {
   const devices = await client.listDevices();
@@ -80,7 +87,6 @@ async function takeScreenshot() {
 
     const timestamp = Date.now();
     const remotePath = `/sdcard/screen-${timestamp}.png`;
-    const localDir = path.join(__dirname, '../snapshots');
     const localPath = path.join(localDir, `screenshot-${timestamp}.png`);
 
     if (!fs.existsSync(localDir)) {
