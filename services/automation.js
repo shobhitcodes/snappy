@@ -3,6 +3,8 @@ const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const { sendShellCommand, takeScreenshot } = require('./adb');
+const os = require('os');
+const homeDir = os.homedir();
 
 let tapInterval;
 let scrollInterval;
@@ -106,7 +108,7 @@ async function checkAd() {
       return false;
     };
 
-    const pythonPath = path.join(__dirname, '..', 'snappy-venv', 'bin', 'python');
+    const pythonPath = path.join(homeDir, 'Downloads', 'Snappy', 'snappy-venv', 'bin', 'python');
     const scriptPath = path.join(__dirname, '..', 'scripts', 'detect_ad.py');
     
     return new Promise((resolve, reject) => {

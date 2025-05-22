@@ -1,14 +1,17 @@
-let currentStep = 3;
+let currentStep;
 
 // elements
+const step0 = document.getElementById('step-0');
 const step1 = document.getElementById('step-1');
 const step2 = document.getElementById('step-2');
 const step3 = document.getElementById('step-3');
 
+const pythonSetupStatus = document.getElementById('python-setup-status');
 const deviceStatus = document.getElementById('device-status');
 const snapchatStatus = document.getElementById('snapchat-status');
 const adStatus = document.getElementById('ad-status');
 
+const btnContinueStep0 = document.getElementById('btn-continue-step0');
 const initialDeviceStatus = deviceStatus.innerHTML;
 const initialSnapchatStatus = snapchatStatus.innerHTML;
 const initialAdStatus = adStatus.innerHTML;
@@ -22,6 +25,13 @@ function showStep() {
   stopAutomation();
   // console.log('showStep: currentStep: ', currentStep);
   switch (currentStep) {
+    case 0:
+      stopPollingAll();
+      step0.style.display = 'block';
+      step1.style.display = 'none';
+      step2.style.display = 'none';
+      step3.style.display = 'none';
+      break;
     case 1:
       stopPollingAll();
       deviceStatus.innerHTML = initialDeviceStatus;
@@ -54,7 +64,56 @@ function showStep() {
   document.body.style.pointerEvents = 'auto';
 }
 
-showStep();
+checkPythonSetup();
+
+async function checkPythonSetup() {
+  try {
+    const setupDone = await window.snappyAPI.checkPythonSetup();
+
+    if (setupDone) {
+      currentStep = 1;
+      showStep();
+    } else {
+      currentStep = 0;
+      showStep();
+      pythonSetupStatus.textContent = '⚠️ Setup Required';
+    }
+  } catch (e) {
+    pythonSetupStatus.textContent = '⚠️ Error checking setup';
+  }
+}
+
+btnContinueStep0.addEventListener('click', () => {
+  checkPythonSetup();
+});
+
+function copyCommand() {
+  const commandText = document.querySelector('.command-box pre').innerText;
+
+  if (!navigator.clipboard) {
+    const textarea = document.createElement('textarea');
+    textarea.value = commandText;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      alertSuccess('Copied');
+    } catch (err) {
+      alertError('Failed to copy');
+    }
+    document.body.removeChild(textarea);
+    return;
+  }
+
+  navigator.clipboard.writeText(commandText)
+    .then(() => {
+      alertSuccess('Copied');
+    })
+    .catch(() => {
+      alertError('Failed to copy');
+    });
+}
+
 
 async function progressUI(step) {
   switch (step) {

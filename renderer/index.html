@@ -13,6 +13,46 @@
   </head>
   <body>
     <div class="container">
+      <!-- Step 0 -->
+      <div id="step-0" class="card" style="display: none">
+        <h2 class="step-title">
+          <div class="dot"></div>
+          <div>Step 0: Python Environment Setup</div>
+        </h2>
+
+        <div class="step-desc">
+          Install required Python packages for automation
+        </div>
+
+        <div class="instructions">
+          <p>
+            Before connecting your phone, run the following commands in your
+            terminal:
+          </p>
+
+          <div class="command-box" style="background: #111; padding: 12px; color: #eee;">
+            <pre style="margin: 0;">
+              mkdir -p ~/Downloads/Snappy
+              cd ~/Downloads/Snappy
+              python3 -m venv snappy-venv
+              source snappy-venv/bin/activate
+              pip install opencv-python
+            </pre>
+            <button class="copy-btn" onclick="copyCommand()">Copy</button>
+          </div>
+        </div>
+
+        <div class="status-row" style="margin-top: 100px;">
+          <div id="python-setup-status" class="flex-center">
+            ⚠️ Setup Required
+          </div>
+
+          <button id="btn-continue-step0">
+            Continue to Next Step
+          </button>
+        </div>
+      </div>
+
       <!-- Step 1 -->
       <div id="step-1" class="card" style="display: none">
         <h2 class="step-title">
@@ -159,9 +199,7 @@
         <div class="status-row">
           <div class="flex-center" id="ad-status"></div>
           <div class="flex-center">
-            <button class="stop-btn" onclick="stopAutomation()">
-              Stop
-            </button>
+            <button class="stop-btn" onclick="stopAutomation()">Stop</button>
             <button class="stop-btn" onclick="stopAdChecker()">
               Stop Ad Check
             </button>

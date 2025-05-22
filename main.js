@@ -2,8 +2,11 @@ const { app, BrowserWindow, Menu, ipcMain, protocol } = require('electron');
 const path = require('path');
 const { checkDeviceConnected, isSnapchatOpen, takeScreenshot } = require('./services/adb');
 const { runTapper, runScroller, runLeftScroll, runRightScroll, runTapAndScroll, stopAutomation, checkAd } = require('./services/automation');
+const os = require('os');
+const fs = require('fs');
+const homeDir = os.homedir();
 
-// process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = 'production';
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
 
@@ -102,6 +105,17 @@ ipcMain.handle('start-tapscroll', (_, config) => runTapAndScroll(config));
 ipcMain.handle('stop-automation', () => stopAutomation());
 ipcMain.handle('take-screenshot', async () => await takeScreenshot());
 ipcMain.handle('check-ad', (_, config) => checkAd(config));
+
+ipcMain.handle('check-python-setup', async () => {
+  const downloadsPath = path.join(homeDir, 'Downloads', 'Snappy');
+  const pythonPath = path.join(downloadsPath, 'snappy-venv', 'bin', 'python');
+
+  if (!fs.existsSync(pythonPath)) {
+    return false;
+  }
+
+  return true;
+});
 
 app.on('window-all-closed', () => {
   if (!isMac) {

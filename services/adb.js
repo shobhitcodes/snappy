@@ -71,7 +71,7 @@ async function isSnapchatOpen() {
 
 async function takeScreenshot() {
   try {
-    const deviceId = await getDeviceId();
+    let deviceId = await getDeviceId();
 
     if (!deviceId) {
       console.error('No device connected');
@@ -90,6 +90,13 @@ async function takeScreenshot() {
     // capture screenshot on device
     await client.shell(deviceId, `screencap -p ${remotePath}`);
     await delay(1500); // give the phone time to finish writing
+
+    deviceId = await getDeviceId();
+
+    if (!deviceId) {
+      console.error('No device connected');
+      return;
+    }
 
     // verify remote file exists
     try {

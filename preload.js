@@ -28,4 +28,5 @@ contextBridge.exposeInMainWorld('snappyAPI', {
   stopAutomation: () => ipcRenderer.invoke('stop-automation'),
   takeScreenshot: () => ipcRenderer.invoke('take-screenshot'),
   checkAd: () => ipcRenderer.invoke('check-ad'),
+  checkPythonSetup: () => ipcRenderer.invoke('check-python-setup'),
 });

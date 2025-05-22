@@ -7,7 +7,7 @@ TEMPLATE_PATHS = [
     "assets/ad_template2.png",
     "assets/ad_template3.png",
 ]
-TEMPLATE_MATCH_THRESHOLD = 0.70
+TEMPLATE_MATCH_THRESHOLD = 0.71
 IMAGE_TOP_CROP_PERCENTAGE = 0.08
 
 def detect_ad(screen_path):
