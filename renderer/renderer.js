@@ -35,6 +35,7 @@ function showStep() {
     case 1:
       stopPollingAll();
       deviceStatus.innerHTML = initialDeviceStatus;
+      step0.style.display = 'none';
       step1.style.display = 'block';
       step2.style.display = 'none';
       step3.style.display = 'none';
@@ -45,6 +46,7 @@ function showStep() {
         clearInterval(pollAdInterval);
       }
       snapchatStatus.innerHTML = initialSnapchatStatus;
+      step0.style.display = 'none';
       step1.style.display = 'none';
       step2.style.display = 'block';
       step3.style.display = 'none';
@@ -52,6 +54,7 @@ function showStep() {
       break;
     case 3:
       adStatus.innerHTML = initialAdStatus;
+      step0.style.display = 'none';
       step1.style.display = 'none';
       step2.style.display = 'none';
       step3.style.display = 'block';

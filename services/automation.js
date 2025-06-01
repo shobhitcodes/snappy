@@ -17,10 +17,14 @@ const assetsPath = app.isPackaged
 let tapInterval;
 let scrollInterval;
 
-function runTapper({ x, y, delay = 4000 }) {
+function runTapper({ x, y, delay = 3000 }) {
+  stopAutomation();
+
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  x = x ?? width / 2 + Math.floor(Math.random() * 400);
-  y = y ?? (height + 100) / 2 + Math.floor(Math.random() * 400);
+  x = x ?? Math.floor(width / 2) + Math.floor(Math.random() * 200 - 100);
+  y = y ?? Math.floor(height / 2) + Math.floor(Math.random() * 200 - 100);
+
+  // console.log(`🖱️ Tapping at (${x}, ${y}) every ${delay}ms`);
 
   tapInterval = setInterval(() => {
     sendShellCommand(`input tap ${x} ${y}`);
@@ -28,35 +32,58 @@ function runTapper({ x, y, delay = 4000 }) {
 }
 
 function runScroller({ direction = 'down', delay = 1500 }) {
+  stopAutomation();
+  
   const swipe = direction === 'down' ? '500 1500 500 800' : '500 800 500 1500';
   scrollInterval = setInterval(() => {
     sendShellCommand(`input swipe ${swipe}`);
   }, delay);
 }
 
-function runLeftScroll({ delay = 5000 }) {
+function runLeftScroll({ delay = 4000 }) {
+  stopAutomation();
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
   scrollInterval = setInterval(() => {
-    const startX = 1000 + Math.floor(Math.random() * 20); // right side
-    const endX = 200 + Math.floor(Math.random() * 20);    // left side
-    const y = 1000 + Math.floor(Math.random() * 20);
+    const swipeWidth = 400;
+    const centerX = Math.floor(width / 2);
+    const centerY = Math.floor(height / 2);
+
+    const startX = centerX + Math.floor(swipeWidth / 2) + Math.floor(Math.random() * 20 - 10);
+    const endX = centerX - Math.floor(swipeWidth / 2) + Math.floor(Math.random() * 20 - 10);
+    const y = centerY + Math.floor(Math.random() * 20);
+
     const duration = 100 + Math.floor(Math.random() * 100);
+    console.log(`Swipe from (${startX}, ${y}) to (${endX}, ${y}) duration=${duration}`);
     sendShellCommand(`input swipe ${startX} ${y} ${endX} ${y} ${duration}`);
   }, delay);
 }
 
-function runRightScroll({ delay = 5000 }) {
+function runRightScroll({ delay = 4000 }) {
+  stopAutomation();
+
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
   scrollInterval = setInterval(() => {
-    const startX = 200 + Math.floor(Math.random() * 20); // left side
-    const endX = 1000 + Math.floor(Math.random() * 20); // right side
-    const y = 1000 + Math.floor(Math.random() * 20);
+    const swipeWidth = 400;
+    const centerX = Math.floor(width / 2);
+    const centerY = Math.floor(height / 2);
+
+    const startX = centerX - Math.floor(swipeWidth / 2) + Math.floor(Math.random() * 20 - 10);
+    const endX = centerX + Math.floor(swipeWidth / 2) + Math.floor(Math.random() * 20 - 10);
+    const y = centerY + Math.floor(Math.random() * 20);
+
     const duration = 100 + Math.floor(Math.random() * 100);
+    console.log(`Swipe from (${startX}, ${y}) to (${endX}, ${y}) duration=${duration}`);
     sendShellCommand(`input swipe ${startX} ${y} ${endX} ${y} ${duration}`);
   }, delay);
 }
 
 let tapScrollActive = false;
 
-function runTapAndScroll({ minDelay = 4000, maxDelay = 5000 }) {
+function runTapAndScroll({ minDelay = 3500, maxDelay = 4000 }) {
+  stopAutomation();
+
   tapScrollActive = true;
 
   const loop = async () => {
@@ -65,26 +92,38 @@ function runTapAndScroll({ minDelay = 4000, maxDelay = 5000 }) {
     // Randomly decide tap or scroll
     const action = Math.random();
 
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
     if (action < 0.4) {
       // 40% chance - tap
-      const { width, height } = screen.getPrimaryDisplay().workAreaSize;
       const x = width / 2 + Math.floor(Math.random() * 400);
       const y = (height + 100) / 2 + Math.floor(Math.random() * 400);
       sendShellCommand(`input tap ${x} ${y}`);
       // console.log(`Tapped at ${x}, ${y}`);
     } else if (action < 0.7) {
       // 30% chance - scroll left
-      const startX = 1000 + Math.floor(Math.random() * 20);
-      const endX = 200 + Math.floor(Math.random() * 20);
-      const y = 1000 + Math.floor(Math.random() * 20);
+      const swipeWidth = 400;
+      const centerX = Math.floor(width / 2);
+      const centerY = Math.floor(height / 2);
+  
+      const startX = centerX - Math.floor(swipeWidth / 2) + Math.floor(Math.random() * 20 - 10);
+      const endX = centerX + Math.floor(swipeWidth / 2) + Math.floor(Math.random() * 20 - 10);
+      const y = centerY + Math.floor(Math.random() * 20);
+  
       const duration = 100 + Math.floor(Math.random() * 100);
+      console.log(`Swipe from (${startX}, ${y}) to (${endX}, ${y}) duration=${duration}`);
       sendShellCommand(`input swipe ${startX} ${y} ${endX} ${y} ${duration}`);
       // console.log('Scrolled left');
     } else {
       // 30% chance - scroll right
-      const startX = 200 + Math.floor(Math.random() * 20);
-      const endX = 1000 + Math.floor(Math.random() * 20);
-      const y = 1000 + Math.floor(Math.random() * 20);
+      const swipeWidth = 400;
+      const centerX = Math.floor(width / 2);
+      const centerY = Math.floor(height / 2);
+
+      const startX = centerX + Math.floor(swipeWidth / 2) + Math.floor(Math.random() * 20 - 10);
+      const endX = centerX - Math.floor(swipeWidth / 2) + Math.floor(Math.random() * 20 - 10);
+      const y = centerY + Math.floor(Math.random() * 20);
+
       const duration = 100 + Math.floor(Math.random() * 100);
       sendShellCommand(`input swipe ${startX} ${y} ${endX} ${y} ${duration}`);
       // console.log('Scrolled right');  
